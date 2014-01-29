@@ -15,12 +15,11 @@ def breakpoint_count(permutation):
     '''Returns the number of breakpoints in a given permutation.'''
 
     # Prepend 0 and append len(permutation)+1 to check if the endpoints are in place.
-    permutation = [0] + permutation + [len(permutation)+1]
-
-    return sum(map(lambda x,y: x - y != 1, permutation[1:], permutation[:-1]))
+    return sum(map(lambda x,y: x - y != 1, permutation+[len(permutation)+1], [0]+permutation))
 
 
-if __name__ == '__main__':
+def main():
+    '''Main call. Reads, runs, and saves problem specific data.'''
 
     # Read the input data.
     with open('data/stepic_8b.txt') as input_data:
@@ -33,3 +32,6 @@ if __name__ == '__main__':
     print str(num_of_breakpoints)
     with open('output/Assignment_08B.txt', 'w') as output_data:
         output_data.write(str(num_of_breakpoints))
+
+if __name__ == '__main__':
+    main()
