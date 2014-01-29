@@ -10,35 +10,36 @@ Problem ID: A
 URL: https://stepic.org/Bioinformatics-Algorithms-2/A-Greedy-Algorithm-for-Sorting-by-Reversals-286/step/2
 '''
 
+from operator import neg
+
 
 def greedy_sorting(permutation):
     '''A greedy algorithm to sort by reversals.'''
-    from operator import neg
 
-    # Initialize the transformation list, which stores all intermediate transformations.
-    transformation_list = []
+    # Initialize a list to store all permutations in the transformation to the identity permutation.
+    permutation_sequence = []
 
-    # Quick lambda functions to find the index of a given element, and swap and negate a region in the permutation.
+    # Lambda function to find the index of a given element in the permutation.
     k_index = lambda perm, k: map(abs, perm).index(k)
+
+    # Lambda function to swap and negate the region spanned from index i to index j.
     k_sort = lambda perm, i, j: perm[:i] + map(neg, perm[i:j+1][::-1]) + perm[j+1:]
 
-    # Loop over the permutation to sort it.
+    # Loop over the permutation to sort it, following the greedy sorting algorithm.
     i = 0
     while i < len(permutation):
         if permutation[i] == i+1:
             i += 1
-        elif permutation[i] == -(i+1):
-            permutation = k_sort(permutation, i, i)
-            transformation_list.append(permutation)
         else:
             permutation = k_sort(permutation, i, k_index(permutation, i+1))
-            transformation_list.append(permutation)
+            permutation_sequence.append(permutation)
 
-    # Note: the approximate reversal distance is the length of the transformation list.
-    return transformation_list
+    # Note: the approximate reversal distance is the length of the permutation sequence.
+    return permutation_sequence
 
 
-if __name__ == '__main__':
+def main():
+    '''Main call. Reads, runs, and saves problem specific data.'''
 
     # Read the input data.
     with open('data/stepic_8a.txt') as input_data:
@@ -53,3 +54,6 @@ if __name__ == '__main__':
     print '\n'.join(reversal_list)
     with open('output/Assignment_08A.txt', 'w') as output_data:
         output_data.write('\n'.join(reversal_list))
+
+if __name__ == '__main__':
+    main()
