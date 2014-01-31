@@ -10,51 +10,39 @@ Problem ID: C
 URL: https://stepic.org/Bioinformatics-Algorithms-2/Computing-the-2Break-Distance-288/step/1
 '''
 
+from collections import defaultdict
+
 
 def two_break_dist(P, Q):
     '''Returns the 2-Break Distance of Circular Chromosomes P and Q.'''
 
     # Construct the break point graph of P and Q.
-    edges = {}
-    for block in P+Q:
-        L = len(block)
-        # Note: Modulo L in the higher index for the edge between the last and first elements.
-        for i in xrange(len(block)):
-            # Add the edge between consecutive items.
-            if block[i] in edges:
-                edges[block[i]].append(-1*block[(i+1) % L])
-            else:
-                edges[block[i]] = [-1*block[(i+1) % L]]
-            # Add in the reverse edge, as we aren't guaranteed a directed cycle without it.
-            if -1*block[(i+1) % L] in edges:
-                edges[-1*block[(i+1) % L]].append(block[i])
-            else:
-                edges[-1*block[(i+1) % L]] = [block[i]]
+    graph = defaultdict(list)
+    for perm_cycle in P+Q:
+        L = len(perm_cycle)
+        for i in xrange(len(perm_cycle)):
+            # Add the edge between consecutive items (both orders since the breakpoint graph is undirected).
+            # Note: Modulo L in the higher index for the edge between the last and first elements.
+            graph[perm_cycle[i]].append(-1*perm_cycle[(i+1) % L])
+            graph[-1*perm_cycle[(i+1) % L]].append(perm_cycle[i])
 
-    # Count the number of cycles in the break point graph.
-    cycles = 0
-    while len(edges) > 0:
-        cycles += 1
-        current = edges.keys()[0]
-        while current in edges:
-            temp = edges[current][0]
-            if len(edges[current]) == 1:
-                del edges[current]
-            else:
-                edges[current] = edges[current][1:]
-            # Remove the complementary edge.
-            if edges[temp] == [current]:
-                del edges[temp]
-            else:
-                edges[temp].remove(current)
+    # BFS to find the number of connected components in the breakpoint graph.
+    component_count = 0
+    remaining = set(graph.keys())
+    while len(remaining) > 0:
+        component_count += 1
+        queue = [remaining.pop()]  # Components are cyclic, so starting point is unimportant.
+        while queue:
+            current = queue.pop(0)
+            queue += filter(lambda node: node in remaining, graph.get(current, []))
+            remaining -= set(queue)  # Overkill, but it's nice and concise!
 
-            current = temp
-
-    # Theorem: d(P,Q) = blocks(P,W) - cycles(P,Q)
-    return sum([len(block) for block in P]) - cycles
+    # Theorem: d(P,Q) = blocks(P,Q) - cycles(P,Q)
+    return sum(map(len,P)) - component_count
 
 
-if __name__ == '__main__':
+def main():
+    '''Main call. Reads, runs, and saves problem specific data.'''
 
     # Read the input data.
     with open('data/stepic_8c.txt') as input_data:
@@ -69,3 +57,6 @@ if __name__ == '__main__':
     print str(dist)
     with open('output/Assignment_08C.txt', 'w') as output_data:
         output_data.write(str(dist))
+
+if __name__ == '__main__':
+    main()
