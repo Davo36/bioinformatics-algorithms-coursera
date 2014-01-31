@@ -10,46 +10,30 @@ Problem ID: D
 URL: https://stepic.org/Bioinformatics-Algorithms-2/Synteny-Block-Construction-289/step/2
 '''
 
+from collections import defaultdict
+from scripts import ReverseComplementDNA as rev_comp
 
-def shared_kmers(dna1, dna2, k):
-    '''Returns a list of positions for shared kmers (up to reverse complement) in dna1 and dna2.'''
-    from scripts import ReverseComplementDNA as rev_comp
 
-    # Initialize the dictionary to store kmers.
-    dna_dict = {}
+def shared_kmers(k, dna1, dna2):
+    '''Returns a list of positions for shared k-mers (up to reverse complement) in dna1 and dna2.'''
 
-    # Store the starting index of all kmers contained in dna1 in a list keyed to the kmer.
+    # Store the starting index of all k-mers from dna1 in a dictionary keyed to the k-mer.
+    dna1_dict = defaultdict(list)
     for i in xrange(len(dna1) - k + 1):
-        # Add the ith kmer.
-        if dna1[i:i+k] in dna_dict:
-            dna_dict[dna1[i:i+k]].append(i)
-        else:
-            dna_dict[dna1[i:i+k]] = [i]
+        dna1_dict[dna1[i:i+k]].append(i)
+        dna1_dict[rev_comp(dna1[i:i+k])].append(i)
 
-        # Add the reverse complement of the ith kmer.
-        if rev_comp(dna1[i:i+k]) in dna_dict:
-            dna_dict[rev_comp(dna1[i:i+k])].append(i)
-        else:
-            dna_dict[rev_comp(dna1[i:i+k])] = [i]
-
-    # Use a set to remove possible duplicate entries.
-    common_kmers = set()
-
-    # Check kmers in dna2 against those in dna1, adding matching indices to common_kmers.
+    # Check k-mers in dna2 against those in dna1, add matching index pairs to a set to remove possible duplicate entries.
+    shared_kmer_indices = set()
     for j in xrange(len(dna2) - k + 1):
-        # Check the jth kmer.
-        if dna2[j:j+k] in dna_dict:
-            for x in dna_dict[dna2[j:j+k]]:
-                common_kmers.add((x,j))
+        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict.get(dna2[j:j+k], [])))
+        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict.get(rev_comp(dna2[j:j+k]), [])))
 
-        # Check the reverse complement of the jth kmer.
-        if rev_comp(dna2[j:j+k]) in dna_dict:
-            for x in dna_dict[rev_comp(dna2[j:j+k])]:
-                common_kmers.add((x,j))
+    return shared_kmer_indices
 
-    return common_kmers
 
-if __name__ == '__main__':
+def main():
+    '''Main call. Reads, runs, and saves problem specific data.'''
 
     # Read the input data.
     with open('data/stepic_8d.txt') as input_data:
@@ -57,9 +41,12 @@ if __name__ == '__main__':
         dna1, dna2 = [line.strip() for line in input_data.readlines()]
 
     # Get the shared kmers.  Sorting doesn't add significant time and makes the result more readable.
-    common = map(str, sorted(shared_kmers(dna1, dna2, k)))
+    shared_kmer_indices = map(str, sorted(shared_kmers(k, dna1, dna2)))
 
     # Print and save the answer.
-    print '\n'.join(common)
+    print '\n'.join(shared_kmer_indices)
     with open('output/Assignment_08D.txt', 'w') as output_data:
-        output_data.write('\n'.join(common))
+        output_data.write('\n'.join(shared_kmer_indices))
+
+if __name__ == '__main__':
+    main()
