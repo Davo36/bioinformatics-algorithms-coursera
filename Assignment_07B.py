@@ -12,12 +12,10 @@ URL: https://stepic.org/Bioinformatics-Algorithms-2/The-Changing-Faces-of-Sequen
 
 
 def fitting_alignment(v,w):
-    '''Returns the fitting alignment of strings v and w.'''
-    from numpy import zeros
-
+    '''Returns the fitting alignment of strings v and w, along with the associated score.'''
     # Initialize the matrices.
-    S = zeros((len(v)+1, len(w)+1), dtype=int)
-    backtrack = zeros((len(v)+1, len(w)+1), dtype=int)
+    S = [[0 for j in xrange(len(w)+1)] for i in xrange(len(v)+1)]
+    backtrack = [[0 for j in xrange(len(w)+1)] for i in xrange(len(v)+1)]
 
     # Fill in the Score and Backtrack matrices.
     for i in xrange(1, len(v)+1):
