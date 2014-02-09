@@ -21,13 +21,12 @@ def shared_kmers(k, dna1, dna2):
     dna1_dict = defaultdict(list)
     for i in xrange(len(dna1) - k + 1):
         dna1_dict[dna1[i:i+k]].append(i)
-        dna1_dict[rev_comp(dna1[i:i+k])].append(i)
 
     # Check k-mers in dna2 against those in dna1, add matching index pairs to a set to remove possible duplicate entries.
     shared_kmer_indices = set()
     for j in xrange(len(dna2) - k + 1):
-        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict.get(dna2[j:j+k], [])))
-        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict.get(rev_comp(dna2[j:j+k]), [])))
+        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict[dna2[j:j+k]]))
+        shared_kmer_indices |= set(map(lambda x: (x,j), dna1_dict[rev_comp(dna2[j:j+k])]))
 
     return shared_kmer_indices
 
